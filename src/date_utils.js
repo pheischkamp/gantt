@@ -6,20 +6,7 @@ const MINUTE = "minute";
 const SECOND = "second";
 const MILLISECOND = "millisecond";
 
-const SHORTENED = {
-  January: "Jan",
-  February: "Feb",
-  March: "Mar",
-  April: "Apr",
-  May: "May",
-  June: "Jun",
-  July: "Jul",
-  August: "Aug",
-  September: "Sep",
-  October: "Oct",
-  November: "Nov",
-  December: "Dec"
-};
+var SHORTENED = { };
 
 export default {
   parse_duration(duration) {
@@ -101,6 +88,8 @@ export default {
     const month_name = dateTimeFormat.format(date);
     const month_name_capitalized =
       month_name.charAt(0).toUpperCase() + month_name.slice(1);
+
+    if(!SHORTENED.hasOwnProperty(month_name_capitalized)) this.add_shortened_month(date.getMonth(), month_name_capitalized, lang)
 
     const values = this.get_date_values(date).map((d) => padStart(d, 2, 0));
     const format_map = {
@@ -219,6 +208,11 @@ export default {
     return new Date(...this.get_date_values(date));
   },
 
+  add_shortened_month(dateIndex, monthNameCapitalized, lang) {
+    const months = monthsForLocale(lang, 'short');
+    SHORTENED[monthNameCapitalized] = months[dateIndex];
+  },
+
   get_date_values(date) {
     return [
       date.getFullYear(),
@@ -263,4 +257,9 @@ function padStart(str, targetLength, padString) {
     }
     return padString.slice(0, targetLength) + String(str);
   }
+}
+
+function monthsForLocale(localeName = 'en', monthFormat = 'long') {
+  const format = new Intl.DateTimeFormat(localeName, {month: monthFormat}).format;
+  return [...Array(12).keys()].map((m) => format(new Date(Date.UTC(2021, (m)%12))));
 }
